@@ -1,5 +1,5 @@
 Bootstrap: localimage
-From: modkit_v0.6.0.sif
+From: modkit_base.sif
 
 %post
     apt-get update
