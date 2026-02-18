@@ -1,0 +1,27 @@
+Bootstrap: localimage
+From: r-base_4.5.2.sif
+
+%post
+    # Mettre à jour les packages système
+    apt-get update
+    apt-get install -y --no-install-recommends \
+        libxml2-dev \
+        libssl-dev \
+        libcurl4-openssl-dev \
+        pandoc
+
+    # Installer les packages R
+	R --slave -e "install.packages('BiocManager', repos='http://cran.r-project.org')"
+    R --slave -e "BiocManager::install(c('ggplot2', 'data.table', 'openxlsx', 'ggrepel', 'CMplot', 'rmarkdown', 'openxlsx', 'DT'))"
+
+%environment
+    export LC_ALL=C
+    export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/conda/bin
+
+%runscript
+    exec R "$@"
+
+%labels
+    Author YourName
+    Version 1.0
+    Description R-base with ggplot2, data.table, and openxlsx
