@@ -1,0 +1,240 @@
+/* Bandeau horizontal fixe contenant logo + infos patient */
+.header-bandeau {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    height: 120px !important;
+    background-color: #EDEBEB !important;
+    z-index: 1001 !important;
+    display: flex !important;
+    align-items: center !important;
+    padding: 0 30px 0 0 !important;
+    /* box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;*/
+}
+
+/* Logo à gauche dans le bandeau - prend toute la hauteur */
+.logo-bandeau {
+    flex-shrink: 0 !important;
+    margin-right: 30px !important;
+    margin-left: 0 !important;
+    padding: 0 !important;
+    height: 120px !important; /* Même hauteur que le bandeau */
+    width: 350px !important; /* Ajustez cette valeur selon vos besoins */
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    overflow: hidden !important;
+}
+
+.logo-bandeau img {
+    height: 120px !important; /* Force la hauteur exacte */
+    width: auto !important; /* Largeur automatique pour garder les proportions */
+    max-width: 350px !important; /* Largeur maximale */
+    display: block !important;
+    object-fit: fill !important; /* ou object-fit: fill si vous acceptez une déformation */
+}
+/* Informations patient à droite du logo */
+.section-lightgrey_id {
+    flex: 1 !important;
+    background-color: transparent !important;
+    padding: 20px !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    height: 100% !important;
+}
+
+/* Conteneur principal sous le bandeau horizontal */
+.main-container-custom {
+    display: flex;
+    margin-top: 120px; /* Hauteur exacte de votre header-bandeau */
+}
+
+/* Sidebar verticale alignée sous le logo */
+/* 1. Le conteneur principal de la TOC */
+#TOC {
+    position: fixed !important;
+    top: 120px !important;
+    left: 0 !important;
+    width: 350px !important;      /* Largeur exacte du logo */
+    min-width: 350px !important;  /* Empêche la réduction */
+    max-width: 350px !important;  /* Empêche l'agrandissement */
+    height: calc(100vh - 120px) !important;
+    background-color: #849cb4 !important;
+    border-radius: 0 !important;
+    border: none !important;
+    border-right: 1px solid #ddd !important;
+    margin: 0 !important;
+    padding: 10px !important;        /* On gère le padding au niveau des liens */
+    z-index: 1000 !important;
+    overflow-y: auto !important;
+}
+
+/* 2. La liste générée par l'extension tocify */
+.tocify {
+    width: 100% !important;
+    max-width: 100% !important;
+    border: none !important;
+    border-radius: 0 !important;
+    margin: 0 !important;        /* CORRIGÉ : On enlève la marge qui décale le bloc */
+    padding: 0 !important;       /* Sécurité supplémentaire */
+}
+
+/* 3. Les éléments de liste (liens) */
+/* Nettoyage global de la structure interne */
+.tocify, 
+.tocify-item, 
+.tocify-subheader,
+.tocify-item a {
+    margin: 0 !important;
+    padding: 0 !important;
+    text-indent: 0 !important;
+    list-style: none !important;
+    width: 100% !important;
+    left: 0 !important;
+}
+
+/* Centrage forcé de l'item */
+.tocify-item {
+    display: flex !important;
+    justify-content: center !important; 
+    align-items: center !important;
+    min-height: 40px; /* Ajustez selon vos besoins */
+}
+
+/* Centrage forcé du lien interne (souvent le vrai porteur du texte) */
+.tocify-item a {
+    display: block !important;
+    text-align: center !important;
+    padding: 10px 0 !important; /* Pour donner du souffle au texte */
+}
+
+/* Suppression du décalage des sous-niveaux (si vous en avez) */
+.tocify-subheader {
+    display: block !important;
+}
+
+/* Ajustement du contenu pour ne pas être caché par la sidebar */
+.main-content-wrapper {
+    margin-left: 350px !important; /* Décale tout le contenu à droite de la TOC */
+    width: calc(100% - 350px) !important;
+    padding: 0 !important;
+}
+
+
+/* 1. Assurez-vous que le layout est bien un container flex */
+.custom-layout {
+    display: flex !important;
+    width: 100% !important;
+    margin-top: 120px !important; 
+    position: relative;
+}
+
+/* 2. Ajustez le contenu principal */
+.custom-content {
+    /* Fondamental : on décale tout le bloc de la largeur de la sidebar */
+    margin-left: 10% !important;
+    
+    /* On calcule la largeur restante pour éviter le débordement horizontal */
+    width: calc(100% - 350px) !important;
+    
+    padding: 0 !important; /* Ajoute un peu d'espace pour que le texte ne colle pas au bandeau bleu */
+    display: block !important;
+    flex: 1 !important;
+}
+
+/* 3. Sécurité pour le footer et les autres éléments internes */
+.main-content-wrapper {
+    margin-left: 0 !important;
+    width: calc(100% - 350px) !important;
+}
+
+.custom-sidebar {
+    position: fixed !important;
+    top: 120px !important;
+    left: 0 !important;
+    width: 350px !important;
+    height: calc(100vh - 120px) !important;
+    background-color: #6885a8 !important;
+    padding-top: 50px !important; /* On gère le padding en interne */
+    z-index: 1000 !important;
+    display: flex !important;
+    flex-direction: column !important; /* Aligne les éléments verticalement */
+}
+
+.button-group {
+    flex-grow: 1 !important; /* Prend tout l'espace disponible et pousse le footer en bas */
+    display: flex;
+    flex-direction: column;
+}
+
+.nav-btn {
+    width: 100%;            /* Force le bouton à faire 350px de large */
+    padding: 15px 25px;     /* Espace interne pour le texte */
+    background: transparent;
+    color: white;           /* Texte en blanc sur fond bleu */
+    border: none;           /* Supprime les bordures de bouton par défaut */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* Ligne subtile entre boutons */
+    text-align: right !important;       /* Aligne le texte à gauche comme une TOC classique */
+    font-size: 1.5em;
+    cursor: pointer;
+    transition: background 0.3s ease; /* Animation fluide au survol */
+    border-radius: 0;       /* Force les angles droits pour supprimer l'effet arrondi */
+}
+
+/* Effet au survol (Hover) */
+.nav-btn:hover {
+    background-color: rgba(255, 255, 255, 0.1); /* Éclaircit légèrement le bleu */
+    /*padding-left: 35px;     /* Petit décalage vers la droite au survol */
+}
+
+/* Cible spécifiquement le lien mail dans la sidebar */
+.sidebar-footer {
+    /* --- COULEUR DE FOND --- */
+    background-color: #EDEBEB !important; /* Changez ce code HEX pour la couleur voulue */
+    
+    padding: 20px 10px !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.2) !important;
+    
+    /* --- ALIGNEMENT --- */
+    width: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+}
+
+.sidebar-footer a, 
+.sidebar-footer a:visited, 
+.sidebar-footer em {
+    color: #454546 !important;      /* Force la couleur en blanc (ou votre choix) */
+    text-decoration: none !important; /* Enlève le soulignement bleu classique */
+    background-color: transparent!important;
+
+    width: 100% !important;           /* Occupe toute la largeur de la sidebar */
+    display: flex !important;          /* Active flexbox pour le footer lui-même */
+    flex-direction: column !important; /* Empile les lignes de texte */
+    align-items: center !important;    /* Centre horizontalement chaque ligne (p, a, em) */
+    text-align: center !important;     /* Sécurité pour le texte brut */
+}
+
+/* Change la couleur au survol pour confirmer que c'est cliquable */
+.sidebar-footer a:hover {
+    color: #A5D6FF !important;      /* Un bleu très clair au survol */
+    text-decoration: underline !important;
+    width: 100% !important;           /* Force le paragraphe à prendre toute la largeur */
+    text-align: center !important;
+}
+
+.sidebar-footer p {
+    width: 100% !important;        /* Prend toute la largeur pour permettre le centrage du texte */
+    text-align: center !important;  /* Centre le texte à l'intérieur du paragraphe */
+    margin: 5px 0 !important;      /* Gère l'espacement vertical */
+    display: block !important;
+}
+
+
+

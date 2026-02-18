@@ -1,0 +1,14 @@
+# containers
+containers/*.sif
+
+data/bam_files/*
+
+# nextflow output
+.nextflow/cache/*
+results/*
+work/*
+.nextflow-console.log
+.nextflow.log.*
+.nextflow.log
+.nextflow.pid
+.nextflow/

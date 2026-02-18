@@ -1,0 +1,259 @@
+---
+output:
+    html_document:
+        css: styles_v7.css
+        toc: true
+        toc_float: true
+            
+params:
+    patient_id:                 "default"
+    cond_1:                     "default"
+    cond_2:                     "default"
+    date:                       "default"
+    sid:                        "default"
+    analysis_type:              "default"
+    mm_type:                    "default"
+    depth_stats:                "default"
+    bam1_stats:                 "default"
+    bam2_stats:                 "default"
+    mm_tag_stats:               "default"
+    histo_score:                "default"
+    cmplot_pos:                 "default"
+    cmplot_neg:                 "default"
+    volcanoplot_region:         "default"
+    barplot_region:             "default"
+    volcanoplot_single:         "default"
+    table_region:               "default"
+    table_single:               "default"
+    version_id:                 "default"
+---
+
+<style>
+/* On cible les ID car RMarkdown les place sur des <div> pour les tabsets */
+[id] {
+  scroll-margin-top: 150px !important;
+}
+
+/* On cible aussi les titres h2 au cas où */
+h2 {
+  scroll-margin-top: 180px !important;
+}
+
+
+</style>
+
+```{r bandeau, echo=FALSE, results='asis'}
+
+patient_id <- params$patient_id
+cond_1 = params$cond_1
+cond_2 = params$cond_2
+date = params$date
+sid = params$sid
+analysis_type = params$analysis_type
+mm_type = params$mm_type
+
+cat(sprintf('
+<div class="header-bandeau">
+
+<div class="logo-bandeau">
+<img src="Logo_D2MAP.gif" alt="Logo">
+</div>
+
+<div class="section-lightgrey_id">
+
+<h1 style="margin: 0 0 5px 0; font-size: 2.5em;">
+<strong>%s</strong>
+<span style="margin-left: 30px;">%s vs %s</span>
+</h1>
+
+
+<h2 style="margin-top: 5px; font-size: 1.5em;">
+<strong>%s</strong>
+<span style="margin-left: 30px;"><strong>Analysis: %s&nbsp;&nbsp;&nbsp;  MM: %s</strong></span>
+</h2>
+
+<h3 style="margin-top: 5px; margin-bottom: 0;  font-size: 1em;">
+<span class="session-text2"><em>Session ID: %s</em></span>
+</h3>
+
+</div>
+</div>'
+, patient_id, cond_1, cond_2, date, analysis_type, mm_type, sid))
+
+```
+
+
+<div class="custom-layout">
+
+```{r navbar, echo=FALSE, results='asis'}
+
+cat(sprintf('
+<nav class="custom-sidebar">
+<div class="button-group">
+<button class="nav-btn" onclick="document.getElementById(\'qcresults\').scrollIntoView({behavior: \'smooth\'})">
+QC Results
+</button>
+<button class="nav-btn" onclick="document.getElementById(\'chapitre2\').scrollIntoView({behavior: \'smooth\'})">
+DM Results
+</button>
+<button class="nav-btn" onclick="document.getElementById(\'chapitre3\').scrollIntoView({behavior: \'smooth\'})">
+DM Tables
+</button>
+</div>
+
+<footer class="sidebar-footer">
+<p>&copy; %s - plateforme <strong>EpICO</strong></p>
+<p style="display: inline;">contact:&nbsp;<em>fabien.gautier@univ-nantes.fr</em></p>
+<p>G&eacute;n&eacute;r&eacute; le : %s</p>
+</footer>
+</nav>
+', format(Sys.Date(), "%Y"), format(Sys.Date(), "%d/%m/%Y")))
+```
+<main class="custom-content">
+
+
+## **QC Results** {.tabset #qcresults}
+
+
+### **Sequencing Depth**
+``` {r qc_results, echo = FALSE, results = "asis"}
+
+depth_stats_content = readLines(params$depth_stats)
+formatted_stats = paste(depth_stats_content, collapse = "\n")
+cat('<pre class="stats-box"><code>')
+cat(paste(formatted_stats, collapse = "\n\n"))
+cat('</code></pre>')
+```
+### **Reads Stats**
+```{r reads_stats, echo = FALSE, results = "asis"}
+bam1_content = readLines(params$bam1_stats)
+bam2_content = readLines(params$bam2_stats)
+cond_a = unlist(strsplit(params$bam1_stats, ".", fixed = T))[1]
+cond_b = unlist(strsplit(params$bam2_stats, ".", fixed = T))[1]
+cat('<pre class="stats-box"><code>')
+cat(paste0("<strong>",cond_a, " :</strong>\n\n"))                                  # corriger pour actualiser le nom en fonction de l'input
+cat(paste(bam1_content, collapse = "\n\n"))
+cat("\n\n")
+cat("=========================\n\n")                                   # idem
+cat(paste0("<strong>",cond_b, " :</strong>\n\n"))                                  # corriger pour actualiser le nom en fonction de l'input
+cat(paste(bam2_content, collapse = "\n\n"))
+cat("\n\n")
+cat('</code></pre>')
+```
+
+### **MM Tag Stats**
+```{r mm_tag_stats, echo = F, results = "asis"}
+mm_tag = readLines(params$mm_tag_stats)
+cat('<pre class="stats-box"><code>')
+cat(paste(mm_tag, collapse ="\n\n"))
+cat('</code></pre>')
+```
+
+## {-}
+
+<hr>
+
+
+## **DM Analysis Results** {.tabset #chapitre2}
+
+### **Regions** {.tabset}
+
+#### **VolcanoPlots**
+```{r volcano_plot_region, echo = F, results = "asis"}
+cat('<img src="', params$volcanoplot_region, '" width="65%"/>\n\n', sep ="")
+```
+
+#### **Features Barplots**
+```{r features_barplot_region, echo = F, results = "asis"}
+cat('<img src="', params$barplot_region, '" width="65%" />\n\n', sep ="")
+```
+
+#### **CMPlots**
+```{r cmplot_region, echo = F, results = "asis"}
+cat('<img src="', params$cmplot_pos, '" width="60%"/>\n\n',sep = "") # à mettre en symétrie
+cat('<img src="', params$cmplot_neg, '" width="60%"/>\n\n',sep = "")
+```
+
+#### **DM Score**
+```{r dm_score_region, echo = F, results = "asis"}
+cat('<img src="', params$histo_score, '" width="70%"/>\n\n', sep = "")
+```
+
+### {-}
+
+### **Single** {.tabset}
+
+#### **VolcanoPlots**
+```{r volcano_single, echo = F, results = "asis"}
+cat('<img src="', params$volcanoplot_single, '" width="65%" />\n\n', sep ="")
+```
+
+#### **Features Barplots**
+TBD
+
+#### **CMPlots**
+TBD
+
+#### **DM Score**
+TBD
+
+### {-}
+
+## {-}
+
+<hr>
+
+
+
+
+## **DM Tables** {.tabset #chapitre3}
+
+### **Regions**
+```{r table_region, echo = F, results = "asis"}
+library(openxlsx)
+library(DT)
+
+table_region =  read.xlsx(params$table_region)
+cat('<div style="width: 100%; margin: auto;">')
+datatable(table_region, options = list(scrollX = TRUE,
+                                        autoWidth = TRUE), 
+                    width = "100%")
+cat('</div>')
+```
+
+### **Single**
+```{r single_region, echo = F, results = "asis"}
+library(openxlsx)
+library(DT)
+
+table_region =  read.xlsx(params$table_single)
+cat('<div style="width: 100%; margin: auto;">')
+datatable(table_region, options = list(scrollX = TRUE,
+                                        autoWidth = TRUE), 
+                    width = "100%")
+cat('</div>')
+```
+
+## {-}
+
+<hr>
+
+<div class="section-bleue">
+
+<!-- TOOLS -->
+
+## **Tools Version**
+```{r tools_version, echo = F, results = "asis"}
+version_id = readLines(params$version_id)
+version_id_clean = version_id[version_id != '']
+cat('<pre class="stats-box"><code>')
+cat(paste(version_id_clean, collapse = " ; "))
+cat('</code></pre>')
+```
+</div>
+
+
+</main>
+
+
+</div>
