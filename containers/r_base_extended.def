@@ -1,27 +1,40 @@
-Bootstrap: localimage
-From: r-base_4.5.2.sif
+Bootstrap: docker
+From: rocker/r-ver:4.4.2
 
 %post
-    # Mettre à jour les packages système
+    export http_proxy=http://proxy-upgrade.intra.glicid.fr:3128
+    export https_proxy=http://proxy-upgrade.intra.glicid.fr:3128
+
+    # Désactiver la vérification GPG
+    echo 'Acquire::AllowInsecureRepositories "true";' > /etc/apt/apt.conf.d/99insecure
+    echo 'Acquire::AllowDowngradeToInsecureRepositories "true";' >> /etc/apt/apt.conf.d/99insecure
+    echo 'APT::Get::AllowUnauthenticated "true";' >> /etc/apt/apt.conf.d/99insecure
+
+    apt-get update --allow-insecure-repositories
+
+    # Installer gnupg et les clés Ubuntu
+    apt-get install -y --allow-unauthenticated gnupg2 ubuntu-keyring
+
+    # Relancer apt-get update proprement
     apt-get update
+
     apt-get install -y --no-install-recommends \
         libxml2-dev \
         libssl-dev \
         libcurl4-openssl-dev \
         pandoc
 
-    # Installer les packages R
-	R --slave -e "install.packages('BiocManager', repos='http://cran.r-project.org')"
+    R --slave -e "install.packages('BiocManager', repos='http://cran.r-project.org')"
     R --slave -e "BiocManager::install(c('ggplot2', 'data.table', 'openxlsx', 'ggrepel', 'CMplot', 'rmarkdown', 'openxlsx', 'DT'))"
 
 %environment
     export LC_ALL=C
-    export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/conda/bin
+    export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
 %runscript
     exec R "$@"
 
 %labels
-    Author YourName
+    Author F. Gautier
     Version 1.0
     Description R-base with ggplot2, data.table, and openxlsx

@@ -1,5 +1,5 @@
-Bootstrap: localimage
-From: modkit_base.sif
+Bootstrap: docker
+From: ontresearch/modkit:sha489d708a48c66368e5d1e118538e5dca68203a64
 
 %post
     apt-get update
