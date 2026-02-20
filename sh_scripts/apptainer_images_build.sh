@@ -16,7 +16,12 @@ apptainer pull $path_to_d2_map_root/containers/dorado.sif docker://nanoporetech/
 apptainer pull $path_to_d2_map_root/containers/multiqc.sif docker://multiqc/multiqc@sha256:a23ffc66f702b7d426634a8daa5314107f996fa0a93ae976b755531a992ebd61
 
 apptainer build --fakeroot $path_to_d2_map_root/containers/modkit_v6_bedtools.sif containers/modkit_bedtools.def
-apptainer build --fakeroot $path_to_d2_map_root/container/R_extended.sif containers/r_base_extended.sif
+apptainer build --fakeroot $path_to_d2_map_root/containers/R_extended.sif containers/r_base_extended.def
 
 rm -rf $APPTAINER_CACHEDIR
 rm -rf $TMPDIR
+
+# micromamba Nextflow env
+
+source $HOME/.bashrc
+micromamba env create -f nextflow_environnment.yml -y
