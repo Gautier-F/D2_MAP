@@ -11,10 +11,10 @@ NB: micromamba installation is required for correct functionality (https://doc.g
 
 Navigate to the D2_MAP root directory, then copy and paste into the terminal:
 
-chmod +x sh_scripts/apptainer_images_build.sh
+chmod u+x sh_scripts/apptainer_images_build.sh
 ./sh_scripts/apptainer_images_build.sh
 
-This installation step may take some time.
+This installation step may take some time. (optionaly run this in a tmux session)
 ###############################################
 
 
@@ -34,3 +34,6 @@ Run the command:
 Launch the pipeline with the commands:
         source /.bashrc
         nextflow run main.nf -params-file inputs_fetching/inputs_d2map.json
+
+
+The analysis report will be available in the results/D2MAP_Report folder.
