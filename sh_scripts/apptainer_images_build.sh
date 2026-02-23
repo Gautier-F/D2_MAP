@@ -41,6 +41,6 @@ rm -rf $APPTAINER_CACHEDIR
 
 # micromamba env for Nextflow
 source $HOME/.bashrc
-micromamba env create -f nextflow_environnment.yml -y
+micromamba env create -f $path_to_d2_map_root/sh_scripts/nextflow_environment.yml -y
 
 rm -rf $TMPDIR
