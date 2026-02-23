@@ -110,16 +110,16 @@ workflow {
     ch_ordered_pileup_files = modkitPileup.out.bam_pileup
                             .toSortedList( { a, b -> a[0].cond <=> b[0].cond } )
                             .map { list -> list.collect { it[1]} } // uniquement les .baseDir
-                            .view()
+    
     ch_ordered_pileup_meta = modkitPileup.out.bam_pileup
                             .toSortedList( { a, b -> a[0].cond <=> b[0].cond } )
                             .map { list -> list.collect { it[0]} }
-                            .view()
+    
     // collecte des 2 fichiers bam d'origine pour modbam check-tags
     ch_ordered_bam = bamSortIndex.out.tuple_bam_bai
                             .toSortedList( { a, b -> a[0].cond <=> b[0].cond } ) // Trie par condition
                             .map { list -> [ list[0][1], list[1][1]] }
-                            .view()
+    
     modkitDmrPair(ch_ordered_pileup_files, ch_ordered_pileup_meta, params.path_to_ref, params.path_to_region, ch_ordered_bam, params.modified_bases )
 
     dmrFilteringEnrichment(modkitDmrPair.output.tuple_dmr_region, params.path_to_annotation_gtf, params.dmr_score_thr)
@@ -177,6 +177,5 @@ workflow {
             report_res,
             file("${projectDir}/MD_report/md_report_v3.rmd")
             )
-
 
 }

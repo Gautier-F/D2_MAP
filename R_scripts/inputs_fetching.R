@@ -9,6 +9,7 @@ script_name = sub(file_arg_name, "", initial_options[grep(file_arg_name, initial
 print(paste("script name: ", script_name))
 script_dir = dirname(normalizePath(script_name)) # chemin parent
 print(paste("script dir: ", script_dir))
+
 # wd definition
 path_to_D2MAP_folder = normalizePath(file.path(script_dir,".."))
 print(paste("path to D2MAP: ", path_to_D2MAP_folder))

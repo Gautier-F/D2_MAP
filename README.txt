@@ -14,7 +14,7 @@ Navigate to the D2_MAP root directory, then copy and paste into the terminal:
 chmod u+x sh_scripts/apptainer_images_build.sh
 ./sh_scripts/apptainer_images_build.sh
 
-This installation step may take some time. (optionaly run this in a tmux session)
+This installation step may take some time. (Optionaly run this in a tmux session)
 ###############################################
 
 
@@ -31,8 +31,9 @@ Open a terminal and navigate to the D2_MAP directory
 Run the command:
         Rscript R_scripts/input_fetching.R
 
-Launch the pipeline with the commands:
-        source /.bashrc
+Launch the pipeline with the commands: /// replace with slurm script
+        source $HOME/.bashrc
+        micromamba activate /micromamba/$USER/envs/nextflow_env 
         nextflow run main.nf -params-file inputs_fetching/inputs_d2map.json
 
 
