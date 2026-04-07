@@ -24,7 +24,7 @@ process dmrFilteringEnrichment {
     > ${dmr_bed.baseName}_filtered.bed
 
     bedtools intersect -a ${dmr_bed}  \
-    -b ${path_to_annotation_bed} \
+    -b <(awk '{ if(\$0 !~ /^#/ && \$0 !~ /^chr/) print "chr"\$0; else print \$0 }' ${path_to_annotation_bed}) \
     -wa -wb | sort -u > ${dmr_bed.baseName}_filtered_enriched.bed
     """
 

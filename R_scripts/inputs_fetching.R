@@ -53,7 +53,8 @@ var_names = c(
     "path_to_bam_2",
     "cond_2",
     "path_to_ref",
-    "path_to_annotation_gtf",
+    "path_to_regulatory_feature_gtf",
+    "path_to_gene_annotation_gtf",
     "path_to_region",
     "dmr_score_thr"
 )

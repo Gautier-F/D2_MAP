@@ -18,11 +18,11 @@ process outputFigureTableRegion {
 
     output:
         path "volcano_plot_${type}.png",            emit: volcano_plot
-        path "barplot_feature_region.png",          emit: barplot_feature_type
+        path "barplot_feature_${type}.png",          emit: barplot_feature_type
         path "dmr_${type}_table.xlsx",              emit: dmr_table
-        path "histo_dm_region_score.png",           emit: histo_score 
-        path "CMplot_region_positive_score.png",    emit: cmplot_pos
-        path "CMplot_region_negative_score.png",    emit: cmplot_neg
+        path "histo_dm_${type}_score.png",           emit: histo_score 
+        path "CMplot_${type}_positive_score.png",    emit: cmplot_pos
+        path "CMplot_${type}_negative_score.png",    emit: cmplot_neg
 
 
     script:
@@ -32,6 +32,6 @@ process outputFigureTableRegion {
 
     """
     
-    /opt/conda/bin/Rscript  ${path_to_script_volcano} ${dmr_filtered_enriched} ${type} ${cond_a} ${cond_b}
+    Rscript  ${path_to_script_volcano} ${dmr_filtered_enriched} ${type} ${cond_a} ${cond_b}
     """
 }

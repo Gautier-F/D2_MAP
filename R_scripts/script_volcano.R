@@ -28,26 +28,30 @@ write.xlsx(df_volcano, name_xlsx)
 
 label_id = "gene_id"
 
-png(paste0("volcano_plot_", type,".png") , width = 8, height = 8, units = "in", res = 150)
-volcano_deltaB_p_adjust_score_v2(df_volcano, label_id, type, cond_b)
+feature_type_list = unique(df_volcano$feature_type)
+
+list_volcano_plot = wrapper_volcano(df_volcano, label_id, type, cond_b, feature_type_list)
+
+png(paste0("volcano_plot_", type,".png") , width = 30, height = 10, units = "in", res = 150)
+plot_grid(plotlist = list_volcano_plot, ncol = length(list_volcano_plot))
 dev.off()
 
-if (type == "region"){
-    png("barplot_feature_region.png", width = 8, height = 8, units = "in", res = 150)
-    print(barplot_feature_type(df_volcano))
-    dev.off()
 
-    png("histo_dm_region_score.png", width = 8, height = 8, units = "in", res = 150)
-    print(hist(dmr_enriched$V5, breaks = 100, xlab = "DM SCORE", main = ""))
-    dev.off()
+png(paste("barplot_feature_", type,  ".png", sep = ""), width = 8, height = 8, units = "in", res = 150)
+print(barplot_feature_type(df_volcano))
+dev.off()
 
-    ##### CMplot
-    df_cmplot_pos = df_cmplot_function(df_dmr)
-    df_cmplot_neg = df_cmplot_function(df_dmr, F)
-    
-    cmplot_pos_score_fun(df_cmplot_pos, cond_b)
-    cmplot_neg_score_fun(df_cmplot_neg, cond_b)
-}
+png(paste("histo_dm_", type, "_score.png", sep = ""), width = 8, height = 8, units = "in", res = 150)
+print(hist(dmr_enriched$V5, breaks = 100, xlab = "DM SCORE", main = ""))
+dev.off()
+
+
+df_cmplot_pos = df_cmplot_function(df_dmr)
+df_cmplot_neg = df_cmplot_function(df_dmr, F)
+
+cmplot_pos_score_fun(df_cmplot_pos, type, cond_b)
+cmplot_neg_score_fun(df_cmplot_neg, type, cond_b)
+
 
 
 

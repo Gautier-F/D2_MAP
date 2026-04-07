@@ -1,22 +1,23 @@
 #!/usr/bin/env nextflow
 
-include { bamMergingFiltering }                 from './modules/bam_merging_filtering.nf'
-include { bamAlignment }                        from './modules/bam_alignment.nf'
-include { bamSortIndex }                        from './modules/bam_sort_index.nf'
-include { collectFlagstats }                    from './modules/collect_align_stats.nf'
-include { collectStats }                        from './modules/collect_align_stats.nf'
-include { MultiQC }                             from './modules/multiqc.nf'
-include { modkitPileup }                        from './modules/modkit_pileup.nf'
-include { modkitDmrPair }                       from './modules/modkit_dmr_windows.nf'
-include { dmrFilteringEnrichment }              from './modules/modkit_dmr_filtering_enrichment.nf'
-include { outputFigureTableRegion }             from './modules/output_figure_table_region.nf'
-include { modkitDmrPairSingleBase }             from './modules/modkit_dmr_2_single_base.nf'
-include { dmrSinglebaseFilteringEnrichment }    from './modules/modkit_dmr_singlebase_filtering_enrichment.nf'
-include { outputFigureTableSingle }             from './modules/output_figure_table_single.nf'
-include { doradoSamtoolsVersion }               from './modules/tools_version.nf'
-include { modkitBedtoolsVersion }               from './modules/tools_version.nf'
-include { rVersion }                            from './modules/tools_version.nf'
-include { mdReport }                            from './modules/report_md.nf'
+include { bamMergingFiltering }                     from './modules/bam_merging_filtering.nf'
+include { bamAlignment }                            from './modules/bam_alignment.nf'
+include { bamSortIndex }                            from './modules/bam_sort_index.nf'
+include { collectFlagstats }                        from './modules/collect_align_stats.nf'
+include { collectStats }                            from './modules/collect_align_stats.nf'
+include { MultiQC }                                 from './modules/multiqc.nf'
+include { modkitPileup }                            from './modules/modkit_pileup.nf'
+include { modkitDmrPair }                           from './modules/modkit_dmr_windows.nf'
+include { dmrFilteringEnrichment }                  from './modules/modkit_dmr_filtering_enrichment.nf'
+include { outputFigureTableRegion }                 from './modules/output_figure_table_region.nf'
+include { modkitDmrPairSingleBase }                 from './modules/modkit_dmr_2_single_base.nf'
+include { dmrSinglebaseFilteringEnrichment }        from './modules/modkit_dmr_singlebase_filtering_enrichment.nf'
+include { outputFigureTableSingle }                 from './modules/output_figure_table_single.nf'
+include { regulatoryFeaturesTables }                from './modules/output_regulatory_feature_tables.nf'
+include { doradoSamtoolsVersion }                   from './modules/tools_version.nf'
+include { modkitBedtoolsVersion }                   from './modules/tools_version.nf'
+include { rVersion }                                from './modules/tools_version.nf'
+include { mdReport }                                from './modules/report_md.nf'
 
 // récupération de la date (utilisée dans le rapport)
 def date = new Date()
@@ -33,17 +34,18 @@ log.info """
     D2_MAP PIPELINE - Loaded Params
     ====================================
 
-    Patient_ID      : ${params.patient_id}
-    Analyse         : ${params.analysis}
-    Modified base   : ${params.modified_bases}
-    Bam 1           : ${params.path_to_bam_1}
-    Label cond. 1   : ${params.cond_1}
-    Bam 2           : ${params.path_to_bam_2}
-    Label cond. 2   : ${params.cond_2}
-    Reference gen.  : ${params.path_to_ref}
-    Annotation      : ${params.path_to_annotation_gtf}
-    Windows         : ${params.path_to_region}
-    Seuil Score DMR : ${params.dmr_score_thr}
+    Patient_ID              : ${params.patient_id}
+    Analyse                 : ${params.analysis}
+    Modified base           : ${params.modified_bases}
+    Bam 1                   : ${params.path_to_bam_1}
+    Label cond. 1           : ${params.cond_1}
+    Bam 2                   : ${params.path_to_bam_2}
+    Label cond. 2           : ${params.cond_2}
+    Reference gen.          : ${params.path_to_ref}
+    Reg. Feat. annot.       : ${params.path_to_regulatory_features_gtf}
+    Genes annot.            : ${params.path_to_gene_annotation_gtf}
+    Windows                 : ${params.path_to_region}
+    Seuil Score DMR         : ${params.dmr_score_thr}
 
     =====================================
 """
@@ -59,7 +61,9 @@ params.sid = session_id
 //--------------------------------------------------------------------------------------------
 //params internes
 params.path_to_script_volcano = "${projectDir}/R_scripts/script_volcano.R"
+params.path_to_script_wrapper= "${projectDir}/R_scripts/wrapper_nearest_genes.R"
 params.path_to_script_source = "${projectDir}/R_scripts/R_functions_D2_MAP.R"
+params.path_to_script_nearest_genes = "${projectDir}/R_scripts/nearest_genes_functions.R"
 
 
 // affichage du logo D2_MAP:
@@ -79,30 +83,9 @@ workflow {
     
     bamMergingFiltering(merge_ch)
 
-   
-    bamAlignment(bamMergingFiltering.out.bam_filtered, params.path_to_ref)
+    bamAlignment(bamMergingFiltering.out.bam_merged, params.path_to_ref)
 
     bamSortIndex(bamAlignment.out.aligned_bam)
-
-    // collecte des stats et copie vers dossier stats_align
-    // ch_ordered_flagstats = bamSortIndex.out.flagstats
-    // On recrée un tuple [meta, file] pour pouvoir trier par meta.cond
-        // .map { file -> 
-        //     def cond_name = file.name.split('\\.')[0] // Récupère le nom avant le premier point
-        //     return [ [cond: cond_name], file ] 
-        // }
-        // .toSortedList( { a, b -> a[0].cond <=> b[0].cond } )
-        // .map { list -> list.collect { it[1] } }
-        // .view()
-    // stats_ch = bamSortIndex.out.stats
-    //             .flatten()
-    //             .collect()
-    // collectStats(stats_ch)
-
-    // rapport bamstats
-
-    // MultiQC(collectStats.out.stats_dir)
-
 
     modkitPileup(bamSortIndex.out.tuple_bam_bai, params.path_to_ref, params.modified_bases)
 
@@ -120,17 +103,45 @@ workflow {
                             .toSortedList( { a, b -> a[0].cond <=> b[0].cond } ) // Trie par condition
                             .map { list -> [ list[0][1], list[1][1]] }
     
-    modkitDmrPair(ch_ordered_pileup_files, ch_ordered_pileup_meta, params.path_to_ref, params.path_to_region, ch_ordered_bam, params.modified_bases )
+    modkitDmrPair(ch_ordered_pileup_files, 
+                    ch_ordered_pileup_meta,
+                    params.path_to_ref,
+                    params.path_to_region,
+                    ch_ordered_bam,
+                    params.modified_bases )
 
-    dmrFilteringEnrichment(modkitDmrPair.output.tuple_dmr_region, params.path_to_annotation_gtf, params.dmr_score_thr)
+    dmrFilteringEnrichment(modkitDmrPair.output.tuple_dmr_region, 
+                            params.path_to_regulatory_features_gtf, 
+                            params.dmr_score_thr)
 
-    outputFigureTableRegion(dmrFilteringEnrichment.output.dmr_filtered_enriched, params.path_to_script_volcano, params.path_to_script_source, "region" )
+    outputFigureTableRegion(dmrFilteringEnrichment.output.dmr_filtered_enriched, 
+                            params.path_to_script_volcano, 
+                            params.path_to_script_source, 
+                            "region" )
 
-    modkitDmrPairSingleBase(ch_ordered_pileup_files, ch_ordered_pileup_meta, dmrFilteringEnrichment.output.dmr_filtered, params.path_to_ref, params.modified_bases)
+    modkitDmrPairSingleBase(ch_ordered_pileup_files, 
+                            ch_ordered_pileup_meta, 
+                            dmrFilteringEnrichment.output.dmr_filtered, 
+                            params.path_to_ref, 
+                            params.modified_bases)
 
-    dmrSinglebaseFilteringEnrichment(modkitDmrPairSingleBase.output.tuple_dmr_single, params.path_to_annotation_gtf, params.dmr_score_thr)
+    dmrSinglebaseFilteringEnrichment(modkitDmrPairSingleBase.output.tuple_dmr_single, 
+                                    params.path_to_regulatory_features_gtf, 
+                                    params.dmr_score_thr)
 
-    outputFigureTableSingle(dmrSinglebaseFilteringEnrichment.output.tuple_dmr_filtered_enriched_single, params.path_to_script_volcano, params.path_to_script_source, "single")
+    outputFigureTableSingle(dmrSinglebaseFilteringEnrichment.output.tuple_dmr_filtered_enriched_single, 
+                            params.path_to_script_volcano, 
+                            params.path_to_script_source, 
+                            "single")
+    
+    regulatoryFeaturesTables(dmrFilteringEnrichment.output.dmr_filtered_enriched, 
+                            dmrSinglebaseFilteringEnrichment.output.tuple_dmr_filtered_enriched_single, 
+                            params.path_to_script_wrapper,
+                            params.path_to_script_nearest_genes,
+                            params.path_to_gene_annotation_gtf,
+                            outputFigureTableRegion.output.dmr_table,
+                            outputFigureTableSingle.output.dmr_table,
+                            )
 
     // Collecte des versions des différents outils
     doradoSamtoolsVersion()
@@ -162,7 +173,7 @@ workflow {
             params.analysis,
             params.modified_bases,
             params.sid,
-            bamMergingFiltering.out.depth_stats.collectFile(name: 'bam_depth.txt', storeDir: 'results/Depth_stats', newLine: true),
+            bamSortIndex.out.qc_stats.collectFile(name: 'bam_stats.txt', storeDir: 'results/qc_stats', newLine: true),
             bamSortIndex.out.flagstats.collect(),
             modkitDmrPair.out.tag_stats,
             outputFigureTableRegion.out.histo_score,
@@ -170,9 +181,14 @@ workflow {
             outputFigureTableRegion.out.cmplot_neg,
             outputFigureTableRegion.out.volcano_plot,
             outputFigureTableRegion.out.barplot_feature_type,
+            outputFigureTableSingle.out.histo_score,
+            outputFigureTableSingle.out.cmplot_pos,
+            outputFigureTableSingle.out.cmplot_neg,
             outputFigureTableSingle.out.volcano_plot,
+            outputFigureTableSingle.out.barplot_feature_type,
             outputFigureTableRegion.out.dmr_table,
             outputFigureTableSingle.out.dmr_table,
+            regulatoryFeaturesTables.out.targeted_genes_dir,
             all_versions_file_ch,
             report_res,
             file("${projectDir}/MD_report/md_report_v3.rmd")

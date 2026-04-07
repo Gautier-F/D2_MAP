@@ -6,6 +6,8 @@ Analyse avec modkit dmr pair single position. A noter que la tendance globale de
 ne se reflète pas forcément au niveau des cytosines prises une à une */
 
 process modkitDmrPairSingleBase {
+    cpus 20
+    memory '40 GB'
 
     publishDir 'results/Bed_files', mode: 'symlink'
     container "${projectDir}/containers/modkit_v6_bedtools.sif"
@@ -59,7 +61,7 @@ process modkitDmrPairSingleBase {
     -o ${output_name}\
     --ref ${path_to_ref_genome} \
     --base ${base} \
-    --threads 16
+    --threads ${task.cpus} 
 
     """
 

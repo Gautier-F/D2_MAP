@@ -8,14 +8,14 @@ process bamMergingFiltering {
         */
         tag "${meta.cond}" 
         publishDir 'results/Bam_files', mode: 'symlink', pattern: '*.bam'
+        publishDir  'results/qc_stats', mode: 'copy', pattern: '*.{txt, tsv}'
         container "${projectDir}/containers/dorado_latest.sif" 
 
         input:
             tuple val(meta), path(input_path_bam_directory)
 
         output:
-            tuple val(meta),  path("${meta.cond}_merged_filtered.bam"),      emit: bam_filtered
-            path "${meta.cond}_depth_stats.txt",                       emit: depth_stats
+            tuple val(meta),  path("${meta.cond}_merged.bam"),      emit: bam_merged
 
         
         script:
@@ -25,10 +25,7 @@ process bamMergingFiltering {
         # merging
         samtools merge -o ${cond}_merged.bam ${input_path_bam_directory}/*.bam 
         # filtering ( Q >= 12 )
-        samtools view -b -q 12 ${cond}_merged.bam > ${cond}_merged_filtered.bam
-
-        # depth stats
-        samtools depth ${cond}_merged.bam | awk '{sum += \$3 } END \
-        { print "${cond}_merged.bam depth: " sum/NR }' | tee -a ${cond}_depth_stats.txt
+        # samtools view -h -b -e '[qs] >= 12' ${cond}_merged.bam > ${cond}_merged_filtered.bam
         """
 }
+

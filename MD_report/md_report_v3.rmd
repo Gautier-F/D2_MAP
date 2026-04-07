@@ -13,18 +13,23 @@ params:
     sid:                        "default"
     analysis_type:              "default"
     mm_type:                    "default"
-    depth_stats:                "default"
+    qc_stats:                   "default"
     bam1_stats:                 "default"
     bam2_stats:                 "default"
     mm_tag_stats:               "default"
-    histo_score:                "default"
-    cmplot_pos:                 "default"
-    cmplot_neg:                 "default"
+    histo_score_region:         "default"
+    cmplot_pos_region:          "default"
+    cmplot_neg_region:          "default"
     volcanoplot_region:         "default"
     barplot_region:             "default"
+    histo_score_single:         "default"
+    cmplot_pos_single:          "default"
+    cmplot_neg_single:          "default"
     volcanoplot_single:         "default"
+    barplot_single:             "default"
     table_region:               "default"
     table_single:               "default"
+    targeted_genes:             "default"
     version_id:                 "default"
 ---
 
@@ -97,6 +102,9 @@ QC Results
 DM Results
 </button>
 <button class="nav-btn" onclick="document.getElementById(\'chapitre3\').scrollIntoView({behavior: \'smooth\'})">
+Targeted Genes
+</button>
+<button class="nav-btn" onclick="document.getElementById(\'chapitre4\').scrollIntoView({behavior: \'smooth\'})">
 DM Tables
 </button>
 </div>
@@ -115,14 +123,36 @@ DM Tables
 ## **QC Results** {.tabset #qcresults}
 
 
-### **Sequencing Depth**
+### **Bam QC**
 ``` {r qc_results, echo = FALSE, results = "asis"}
+library(DT)
+qc_stats_content = readLines(params$qc_stats)
+sample_a = qc_stats_content[2]
+sample_a_split = strsplit(sample_a, "\t")[[1]][1]
 
-depth_stats_content = readLines(params$depth_stats)
-formatted_stats = paste(depth_stats_content, collapse = "\n")
-cat('<pre class="stats-box"><code>')
-cat(paste(formatted_stats, collapse = "\n\n"))
-cat('</code></pre>')
+read_tot_n50_qmean_a = qc_stats_content[4]
+read_tot_n50_qmean_a_split = strsplit(read_tot_n50_qmean_a, "\t")[[1]]
+
+sample_b = qc_stats_content[7]
+sample_b_split = strsplit(sample_b, "\t")[[1]][1]
+
+read_tot_n50_qmean_b = qc_stats_content[9]
+read_tot_n50_qmean_b_split = strsplit(read_tot_n50_qmean_b, "\t")[[1]]
+
+df_qc = data.frame(
+    Sample = c(sample_a_split, sample_b_split),
+    Reads = c(read_tot_n50_qmean_a_split[1], read_tot_n50_qmean_b_split[1]),
+    Total_bases = c(read_tot_n50_qmean_a_split[2], read_tot_n50_qmean_b_split[2]),
+    N50 = c(read_tot_n50_qmean_a_split[3], read_tot_n50_qmean_b_split[3]),
+    Phred = c(read_tot_n50_qmean_a_split[4], read_tot_n50_qmean_b_split[4]),
+    MeanDepth = c(read_tot_n50_qmean_a_split[5], read_tot_n50_qmean_b_split[5]),
+    MAPQ_Mean = c(read_tot_n50_qmean_a_split[6], read_tot_n50_qmean_b_split[6])
+)
+
+cat('<div style="width: 100%;">')
+datatable(df_qc, width = "100%")
+cat('</div>')
+
 ```
 ### **Reads Stats**
 ```{r reads_stats, echo = FALSE, results = "asis"}
@@ -160,42 +190,53 @@ cat('</code></pre>')
 
 #### **VolcanoPlots**
 ```{r volcano_plot_region, echo = F, results = "asis"}
-cat('<img src="', params$volcanoplot_region, '" width="65%"/>\n\n', sep ="")
+cat('<img src="', params$volcanoplot_region, '" width="100%"/>\n\n', sep ="")
 ```
 
 #### **Features Barplots**
 ```{r features_barplot_region, echo = F, results = "asis"}
-cat('<img src="', params$barplot_region, '" width="65%" />\n\n', sep ="")
+cat('<img src="', params$barplot_region, '" width="40%" />\n\n', sep ="")
 ```
 
 #### **CMPlots**
 ```{r cmplot_region, echo = F, results = "asis"}
-cat('<img src="', params$cmplot_pos, '" width="60%"/>\n\n',sep = "") # à mettre en symétrie
-cat('<img src="', params$cmplot_neg, '" width="60%"/>\n\n',sep = "")
+cat('<div style="display: flex; justify-content: center; align-items: center;">')
+  cat('<img src="', params$cmplot_pos_region, '" style="width: 45%; margin-right: 5px;"/>', sep = "")
+  cat('<img src="', params$cmplot_neg_region, '" style="width: 45%;"/>', sep = "")
+cat('</div>')
 ```
 
 #### **DM Score**
 ```{r dm_score_region, echo = F, results = "asis"}
-cat('<img src="', params$histo_score, '" width="70%"/>\n\n', sep = "")
+cat('<img src="', params$histo_score_region, '" width="40%"/>\n\n', sep = "")
 ```
 
 ### {-}
 
-### **Single** {.tabset}
+### **Single Base** {.tabset}
 
 #### **VolcanoPlots**
 ```{r volcano_single, echo = F, results = "asis"}
-cat('<img src="', params$volcanoplot_single, '" width="65%" />\n\n', sep ="")
+cat('<img src="', params$volcanoplot_single, '" width="100%" />\n\n', sep ="")
 ```
 
 #### **Features Barplots**
-TBD
+```{r features_barplot_single, echo = F, results = "asis"}
+cat('<img src="', params$barplot_single, '" width="40%" />\n\n', sep ="")
+```
 
 #### **CMPlots**
-TBD
+```{r cmplot_single, echo = F, results = "asis"}
+cat('<div style="display: flex; justify-content: center; align-items: center;">')
+  cat('<img src="', params$cmplot_pos_single, '" style="width: 45%; margin-right: 5px;"/>', sep = "")
+  cat('<img src="', params$cmplot_neg_single, '" style="width: 45%;"/>', sep = "")
+cat('</div>')
+```
 
 #### **DM Score**
-TBD
+```{r dm_score_single, echo = F, results = "asis"}
+cat('<img src="', params$histo_score_single, '" width="40%"/>\n\n', sep = "")
+```
 
 ### {-}
 
@@ -203,34 +244,175 @@ TBD
 
 <hr>
 
+## **Targeted Genes** {.tabset #chapitre3}
+
+### **Regions** {.tabset}
+```{r targeted_genes_region, echo = F, results = "asis", message = F, warning= F}
+# récupération des tables contenues dans le dossier Targeted_genes/Region/
+library(openxlsx)
+library(DT)
+library(data.table)
+library(htmltools)
+library(dplyr)
+
+list_table_region = list.files(paste0(params$targeted_genes, "/Region/"), pattern = "\\.xlsx$", full.names = TRUE)
+
+if (length(list_table_region) == 0) {
+    cat('<p>No targeted genes identified for differentially methylated regions.</p>')
+} else {
+    for (table_path in list_table_region) {
+        table_region = read.xlsx(table_path)
+        table_region = as.data.frame(table_region)
+        table_region$p_adjust_dmr = as.numeric(table_region$p_adjust_dmr) # Ensure p_adjust_dmr is numeric
+        table_region_sig = table_region %>% filter(p_adjust_dmr < 0.05)
+        table_region_sorted = table_region_sig[order(table_region_sig$p_adjust_dmr), ]
+        top_table_region = head(table_region_sorted, n = 200)
+
+        if (nrow(top_table_region) == 0) {
+          cat(paste0("<p>Le fichier ", basename(table_path), " est vide.</p>"))
+        next
+      }
+        # df formatting for datatable
+        df_groups <- top_table_region %>%
+                      mutate(group_id = rleid(regulatory_feature)) # create a grouping variable based on the regulatory_feature column
+
+        dt_region = datatable(
+                              df_groups,
+                              rownames = FALSE,
+                              options = list(
+                                columnDefs = list(list(targets = "group_id", visible = FALSE)), # hide the grouping variable column
+                                autoWidth = TRUE,
+                                scrollX = TRUE
+                              ),
+                              width = "100%"
+                            ) %>%
+                    formatStyle(
+                                'group_id',
+                                target = 'row',
+                                backgroundColor = styleEqual(
+                                  unique(df_groups$group_id[df_groups$group_id %% 2 == 0]), 
+                                  rep('#e6f0fc', length(unique(df_groups$group_id[df_groups$group_id %% 2 == 0])))
+                                ),
+                                # Optionnel : ajouter une bordure en haut de chaque nouveau groupe
+                                borderTop = styleEqual(
+                                  unique(df_groups$group_id),
+                                  rep('1px solid #bbd6ef', length(unique(df_groups$group_id)))
+                                )
+                              )
 
 
 
-## **DM Tables** {.tabset #chapitre3}
+        name_table = strsplit(basename(table_path), "_")[[1]][1] 
+        name_table_up = toupper(name_table)
+        name_tab = paste0("Reg.Feat. ", name_table_up)
+        cat('<div style="width: 100%; margin: auto; margin-bottom: 30px;">')
+        cat(paste("\n\n#### **", name_tab , "**\n\n", sep = ""))
+        print(htmltools::tagList(dt_region))
+        cat('</div>')
+    }
+}
+
+```
+
+### {-}
+
+### **Single Base** {.tabset}
+```{r targeted_genes_single, echo = F, results = "asis"}
+# récupération des tables contenues dans le dossier Targeted_genes/Region/
+library(openxlsx)
+library(DT)
+library(htmltools)
+library(dplyr)
+
+list_table_single = list.files(paste0(params$targeted_genes, "/Single/"), pattern = "\\.xlsx$", full.names = TRUE)
+
+if (length(list_table_single) == 0) {
+    cat('<p>No targeted genes identified for differentially methylated single bases.</p>')
+} else {
+    for (table_path in list_table_single) {
+        table_single = read.xlsx(table_path)
+        table_single$p_adjust_dmr = as.numeric(table_single$p_adjust_dmr) # Ensure p_adjust_dmr is numeric
+        table_single_sig = table_single %>% filter(p_adjust_dmr < 0.05)
+        table_single_sorted = table_single_sig[order(table_single_sig$p_adjust_dmr), ]
+        top_table_single = head(table_single_sorted, n = 200)
+        name_table = strsplit(basename(table_path), "_")[[1]][1] 
+        name_table_up = toupper(name_table)
+        name_tab = paste0("Reg.Feat. ", name_table_up)
+
+        if(nrow(top_table_single) == 0) {
+            cat(paste0("<p>No significant targeted genes found for ", name_tab, ".</p>"))
+            next
+        } 
+        cat('<div style="width: 100%; margin: auto; margin-bottom: 30px;">')
+        cat(paste("\n\n#### **", name_tab , "**\n\n", sep = ""))
+        print(htmltools::tagList(datatable(top_table_single, options = list(scrollX = TRUE, autoWidth = TRUE), width = "100%")))
+        cat('</div>')
+    }
+}
+
+```
+
+### {-}
+
+## {-}
+
+## **DM Tables** {.tabset #chapitre4}
 
 ### **Regions**
 ```{r table_region, echo = F, results = "asis"}
 library(openxlsx)
 library(DT)
+library(dplyr)
 
 table_region =  read.xlsx(params$table_region)
+table_region_sig = table_region %>% filter(p_adj_BH < 0.05)
+table_region_sorted = table_region_sig[order(table_region_sig$p_adj_BH), ]
+top_table_region = head(table_region_sorted, n = 200)
+top_table_region$score = round(top_table_region$score, 2)
+top_table_region$deltaB = round(top_table_region$deltaB, 2)
+top_table_region$p_value = signif(top_table_region$p_value, digits = 3)
+top_table_region$p_adj_BH = signif(top_table_region$p_adj_BH, digits = 3) 
+top_table_region$log_p_adjust = signif(top_table_region$log_p_adjust, digits = 3)
+
+
+if(nrow(top_table_region) == 0) {
+    cat('<p>No significant differentially methylated region found.</p>')
+} else {
+
 cat('<div style="width: 100%; margin: auto;">')
-datatable(table_region, options = list(scrollX = TRUE,
+datatable(top_table_region, options = list(scrollX = TRUE,
                                         autoWidth = TRUE), 
-                    width = "100%")
+                                width = "100%")
+}
 cat('</div>')
 ```
 
-### **Single**
+### **Single Base**
 ```{r single_region, echo = F, results = "asis"}
 library(openxlsx)
 library(DT)
+library(dplyr)
 
-table_region =  read.xlsx(params$table_single)
+table_single =  read.xlsx(params$table_single)
+table_single_sig = table_single %>% filter(p_adj_BH < 0.05)
+table_single_sorted = table_single_sig[order(table_single_sig$p_adj_BH), ]
+top_table_single = head(table_single_sorted, n = 200)
+top_table_single$score = round(top_table_single$score, 2)
+top_table_single$deltaB = round(top_table_single$deltaB, 2)
+top_table_single$p_value = signif(top_table_single$p_value, digits = 3)
+top_table_single$p_adj_BH = signif(top_table_single$p_adj_BH, digits = 3) 
+top_table_single$log_p_adjust = signif(top_table_single$log_p_adjust, digits = 3)
+
+
+if (nrow(top_table_single) == 0) {
+    cat('<p>No significant differentially methylated single base found.</p>')
+} else {  
+
 cat('<div style="width: 100%; margin: auto;">')
-datatable(table_region, options = list(scrollX = TRUE,
+datatable( top_table_single  , options = list(scrollX = TRUE,
                                         autoWidth = TRUE), 
-                    width = "100%")
+                              width = "100%")
+}
 cat('</div>')
 ```
 

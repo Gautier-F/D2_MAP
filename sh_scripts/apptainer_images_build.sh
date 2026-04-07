@@ -1,6 +1,9 @@
 #!/bin/bash
 
 # This script builds the Apptainer images for D2_MAP. It should be run from the root of the D2_MAP repository.
+path_to_genome_folder="$1"
+WINDOW=${2:-1000}
+STEP=${3:-500}
 
 path_to_d2_map_root=$(pwd)
 
@@ -40,7 +43,17 @@ rm -rf $APPTAINER_CACHEDIR
 
 
 # micromamba env for Nextflow
-source $HOME/.bashrc
-micromamba env create -f $path_to_d2_map_root/sh_scripts/nextflow_environment.yml -y
+if [ ! -d /micromamba/$USER/envs/nextflow_env ]; then
+    echo "Nextflow environment does not exist. Creating it now..."
+    source $HOME/.bashrc
+    micromamba env create -f $path_to_d2_map_root/sh_scripts/nextflow_environment.yml -y
+else
+    echo "Nextflow environment already exists."
+fi
 
 rm -rf $TMPDIR
+
+# windowing file generation
+eval "$(micromamba shell hook --shell bash)"
+micromamba activate /micromamba/$USER/envs/nextflow_env
+bedtools makewindows -g $path_to_genome_folder/genome.fa.fai -w $WINDOW -s $STEP > $path_to_d2_map_root/data/windows_sliding.bed

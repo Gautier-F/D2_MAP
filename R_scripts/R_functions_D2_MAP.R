@@ -3,19 +3,26 @@ library(data.table)
 library(ggplot2)
 library(ggrepel)
 library(CMplot)
+library(cowplot)
 
 ########################
 ########################
 # extraction des différentes id contenues dans la colonne meta du dmr_enriched
-meta_parsing = function(meta_split_element, id = "gene_id"){
-    # id = gene_id, feature_type, gene_name
-    id_meta = grep(id, meta_split_element, value = T)
+extract_gene_id <- function(meta_col) {
+  stringr::str_match(meta_col, '(?:gene_id \"?|ID=)([^";\\s]+)')[,2]
+}
 
-    if (length(id_meta) == 0) return("None")
+extract_gene_name = function(meta_col){
+    meta_split = strsplit(meta_col, ";" )[[1]]
+    name_field = grep("gene_name", meta_split, value = T)
+    # remove "= " in gff3 notation
+    name_field_clean = gsub("=", " ", name_field)
+
+    if (length(name_field_clean) == 0) return("None")
     else{
-        id = strsplit(id_meta, id)[[1]][2]
-    }
-    return(id)
+        name = strsplit(name_field_clean, "gene_name")[[1]][2]
+        }
+    return(name)
     }
 
 # comptage pour fischer test
@@ -29,58 +36,40 @@ get_modified_counts = function(x){
 # génère une df à partir d'un dmr enrichi à l'étape dmrFilteringEnrichment ( step6 ).
 
 df_dmr_enriched = function(dmr_enriched, type = "region", cond_a, cond_b){
-        # type = "region", "single"
-        # extraction du nombre de comptage de base modifiées par condition:
-        met_cond_a = unlist(lapply(dmr_enriched$V7, get_modified_counts)) # ! colonne V6 si la colonne strand n'apparait pas
-        met_cond_b = unlist(lapply(dmr_enriched$V9, get_modified_counts))
-        df = data.frame(chr = dmr_enriched$V1,
-                start = dmr_enriched$V2,
-                end = dmr_enriched$V3,
-                score = dmr_enriched$V5,
-                met_cond_a = met_cond_a,
-                tot_cond_a = dmr_enriched$V8, # comptage nbr read total
-                met_cond_b = met_cond_b,
-                tot_cond_b = dmr_enriched$V10, 
-                deltaB = dmr_enriched$V14 - dmr_enriched$V13,
-                status = ifelse(
-                                (dmr_enriched$V14 - dmr_enriched$V13) >= 0, 
-                                paste0("Hyperméthylé ",cond_b), paste0("Hypométhylé ", cond_b)
-                                )             
-                )      
-        # meta parsing             
-        meta = dmr_enriched$V27
+    # type = "region", "single"
+    # extraction du nombre de comptage de base modifiées par condition:
+    met_cond_a = unlist(lapply(dmr_enriched$V7, get_modified_counts)) # ! colonne V6 si la colonne strand n'apparait pas
+    met_cond_b = unlist(lapply(dmr_enriched$V9, get_modified_counts))
+    df = data.frame(chr = dmr_enriched$V1,
+            start = dmr_enriched$V2,
+            end = dmr_enriched$V3,
+            score = dmr_enriched$V5,
+            met_cond_a = met_cond_a,
+            tot_cond_a = dmr_enriched$V8, # comptage nbr read total
+            met_cond_b = met_cond_b,
+            tot_cond_b = dmr_enriched$V10, 
+            deltaB = dmr_enriched$V14 - dmr_enriched$V13,
+            status = ifelse(
+                            (dmr_enriched$V14 - dmr_enriched$V13) >= 0, 
+                            paste0("Hyperméthylé ",cond_b), paste0("Hypométhylé ", cond_b)
+                            )             
+            )      
+    # meta parsing 
+    if (type == "single"){
+        meta_col = dmr_enriched$V28
+        list_feature_type = dmr_enriched$V22
+    }
+    else if (type == "region"){
+        meta_col = dmr_enriched$V27
+        list_feature_type = dmr_enriched$V21
+    }
 
+    list_gene_id = unlist(lapply(meta_col, extract_gene_id))
+    list_gene_name = unlist(lapply(meta_col, extract_gene_name)) # if feature_type == "promoter"
 
-    # if(type == "single"){
-    #     # extraction du nombre de comptage de base modifiées par condition:
-    #     met_cond_1 = unlist(lapply(dmr_enriched$V7, get_modified_counts)) 
-    #     met_cond_2 = unlist(lapply(dmr_enriched$V9, get_modified_counts))
-    #     df = data.frame(chr = dmr_enriched$V1,
-    #             start = dmr_enriched$V2,
-    #             end = dmr_enriched$V3,
-    #             score = dmr_enriched$V5,
-    #             met_cond_1 = dmr_enriched$V7, # comptage nbr read méthylé à cette position pour la condition 1
-    #             tot_cond_1 = dmr_enriched$V8, # comptage nbr read total
-    #             met_cond_2 = dmr_enriched$V9,
-    #             tot_cond_2 = dmr_enriched$V10, 
-    #             deltaB = dmr_enriched$V14 - dmr_enriched$V13,
-    #             status = ifelse((dmr_enriched$V14 - dmr_enriched$V13) > 0, 
-    #                             "Hyperméthylé cond.2", "Hypométhylé cond.2")             
-    #             )      
-    #     # meta parsing             
-    #     meta = dmr_enriched$V28
-    # }
-    if (type == "region"){
-        meta_split = strsplit(meta, ";" )
-        gene_ID = lapply(meta_split, meta_parsing, id = "gene_id")
-        feature_type = lapply(meta_split, meta_parsing, id = "feature_type")
-        gene_name = lapply(meta_split, meta_parsing, id = "gene_name")
-
-        df$gene_id = gene_ID
-        df$feature_type = as.factor(unlist(feature_type))
-        df$gene_name = gene_name
-        }
-
+    df$gene_id = list_gene_id
+    df$feature_type = list_feature_type
+    df$gene_name = list_gene_name
     return(df)
 }
 
@@ -94,7 +83,7 @@ fischer_test_func = function(mod_1, mod_2, non_mod_1, non_mod_2){
     return(pval)
 }
 
-df_volcano_fun = function(df_dmr, type = "region"){ 
+df_volcano_fun = function(df_dmr, type = "region"){  #df_dmr = output de df_dmr_enriched
 
 
     deltaB = df_dmr$deltaB # cond_b - cond_a cf ligne 44
@@ -136,9 +125,19 @@ df_volcano_fun = function(df_dmr, type = "region"){
 #       Volcano plot        #
 #############################
 
+#### subset de la df volcano en fonction des feature_type pour pouvoir produire un volcano par feature
 
-volcano_deltaB_p_adjust_score_v2 = function(df, label_id = "gene_id", type = "region", cond){
 
+
+df_feature_type = function(df, feature){
+    df_subset = subset(df, feature_type == feature)
+    return(df_subset)
+    }
+
+
+volcano_deltaB_p_adjust_score_v2 = function(df, label_id = "gene_id", type = "region", cond, feature_name){ # df = df_volcano
+
+    # cond = condition of interest for the label of the rectangles (ex: "cond.2" if we want to label hyper/hypo methylation in cond.2)
     # label = gene_id, feature_type, gene_name
     # type = Régions, "SingleBased"
 
@@ -160,8 +159,15 @@ volcano_deltaB_p_adjust_score_v2 = function(df, label_id = "gene_id", type = "re
         label_hypo = paste0(cond, " cond. Hypo-methylated")
     )
 
-    df_subset = subset(df, p_adj_BH <= 0.05) # subset df aux points significatifs
 
+    df_subset = subset(df, p_adj_BH <= 0.05) # subset df aux points significatifs
+    ind_dup = which(duplicated(df_subset$start)) # index des points dupliqués (start) dans la df subset
+    df_subset = df_subset[-ind_dup, ] # suppression des points dupliqués dans la df subset pour éviter les problèmes d'affichage des labels
+    df_subset_sorted = df_subset[order(df_subset$score, decreasing = T),] # tri de la df subset par score pour afficher en priorité les points avec les scores les plus élevés
+    df_subset_sorted_trim = df_subset_sorted[1:10, ] # limitation à 10 points pour éviter les problèmes d'affichage des labels
+
+    
+    
     p = ggplot(df, aes(x = deltaB, y = log_p_adjust, color = score, shape = status)) +
 
             geom_rect(data = left_rect, aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, fill = fill),
@@ -186,7 +192,7 @@ volcano_deltaB_p_adjust_score_v2 = function(df, label_id = "gene_id", type = "re
             geom_point(size = 3) 
     if(type == "region"){
 
-        p = p + geom_text_repel(data = df_subset,
+        p = p + geom_text_repel(data = df_subset_sorted_trim,
             aes_string( x = "deltaB", y= "log_p_adjust", label = label_id ),
             vjust = 2.5, hjust = 0.5, size = 4, color = "black",
             inherit.aes = FALSE, max.overlaps = Inf
@@ -212,7 +218,7 @@ volcano_deltaB_p_adjust_score_v2 = function(df, label_id = "gene_id", type = "re
                 y = "-Log10(p_adjust)",
                 color = "Score",
                 shape = "",
-                title = paste("DM ", ifelse(type == "region", "Regions", "Single Base"), sep = "")
+                title = paste(feature_name, ifelse(type == "region", " Regions", " Single Base"), sep = "")
             ) +
             guides(shape = "none") + # enlève la légende des points
             theme(
@@ -222,6 +228,23 @@ volcano_deltaB_p_adjust_score_v2 = function(df, label_id = "gene_id", type = "re
                 legend.position = "right"
             )
     return(p)
+}
+
+### wrapper pour le volcano plot avec production d'un volcano plot par feature_type
+
+df_feature_type = function(df, feature){
+    df_subset = subset(df, feature_type == feature)
+    return(df_subset)
+    }
+
+wrapper_volcano = function(df, label_id, type, cond, feature_list){
+    list_volcano = list()
+    for (feature in feature_list){
+        df_subset = df_feature_type(df, feature)
+        p = volcano_deltaB_p_adjust_score_v2(df_subset, label_id, type, cond, feature)
+        list_volcano[[feature]] = p
+        }
+    return(list_volcano)
 }
 
 # BarPlot feature_type (CTCF_binding_site, enhancer...)
@@ -245,6 +268,9 @@ barplot_feature_type = function(df){
             legend.position = "right")
 
 }
+
+
+
 
 
 #####################
@@ -287,9 +313,9 @@ df_cmplot_function = function(df_enriched, positivity = T){
 
 
 
-cmplot_pos_score_fun = function(df_cmplot_pos, cond){
-
-    png("CMplot_region_positive_score.png", width = 8, height = 8, units = "in", res = 150) 
+cmplot_pos_score_fun = function(df_cmplot_pos, type, cond){
+    name_fig = paste("CMplot_", type, "_positive_score.png", sep = "")
+    png(name_fig, width = 8, height = 8, units = "in", res = 150) 
     CMplot(df_cmplot_pos,
         plot.type = "d",     # density plot
         col = c("green", "yellow", "red"),  # gradient de couleurs
@@ -305,9 +331,9 @@ cmplot_pos_score_fun = function(df_cmplot_pos, cond){
     dev.off()
 }
 
-cmplot_neg_score_fun = function(df_cmplot_neg, cond){
-
-    png("CMplot_region_negative_score.png", width = 8, height = 8, units = "in", res = 150)
+cmplot_neg_score_fun = function(df_cmplot_neg, type, cond){
+    name_fig = paste("CMplot_", type, "_negative_score.png", sep = "")
+    png(name_fig, width = 8, height = 8, units = "in", res = 150)
     CMplot(df_cmplot_neg,
         plot.type = "d",     # density plot
         col = c("green", "yellow", "red"),  # gradient de couleurs
