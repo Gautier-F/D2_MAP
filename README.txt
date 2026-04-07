@@ -12,7 +12,7 @@ Note: micromamba installation is required for correct functionality (https://doc
 Navigate to the D2_MAP root directory, then copy and paste these command lines into the terminal:
 
 chmod u+x sh_scripts/apptainer_images_build.sh
-./sh_scripts/apptainer_images_build.sh <path_to_your_genome_FOLDER>
+sbatch --mail-user=<your_email@adress> /sh_scripts/slurm_pipeline_setup.sh <path_to_your_genome_FOLDER>
 
 Note: The genome folder must contain the genome index (e.g. genome.fa.fai)
 
