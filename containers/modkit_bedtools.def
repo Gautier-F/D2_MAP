@@ -2,25 +2,43 @@ Bootstrap: docker
 From: ontresearch/modkit:sha489d708a48c66368e5d1e118538e5dca68203a64
 
 %post
-    apt-get update
-    apt-get install -y bedtools wget bzip2 build-essential bc
-    apt-get install -y \
-        zlib1g \
-        zlib1g-dev \
-        libbz2-1.0 \
-        libbz2-dev \
-        liblzma5 \
-        liblzma-dev \
-        libcurl4 \
-        libcurl4-openssl-dev \
-        libssl-dev \
-        pkg-config
+    set -e
+    export http_proxy=http://proxy-upgrade.intra.glicid.fr:3128
+    export https_proxy=http://proxy-upgrade.intra.glicid.fr:3128
 
-    # Installation de htslib (contient bgzip et tabix)
+    mkdir -p /etc/apt/apt.conf.d/
+    echo 'APT::Sandbox::User "root";'                                          > /etc/apt/apt.conf.d/99sandbox
+    echo 'Acquire::http::Proxy "http://proxy-upgrade.intra.glicid.fr:3128";'  >> /etc/apt/apt.conf.d/99sandbox
+    echo 'Acquire::https::Proxy "http://proxy-upgrade.intra.glicid.fr:3128";' >> /etc/apt/apt.conf.d/99sandbox
+    echo 'Acquire::AllowInsecureRepositories "true";'                          >> /etc/apt/apt.conf.d/99sandbox
+    echo 'APT::Get::AllowUnauthenticated "true";'                              >> /etc/apt/apt.conf.d/99sandbox
+
+    apt-get update -y
+    apt-get install -y --no-install-recommends \
+        bedtools wget bzip2 bc \
+        make gcc g++ libc6-dev \
+        zlib1g zlib1g-dev \
+        libbz2-1.0 libbz2-dev \
+        liblzma5 liblzma-dev \
+        libcurl4 libcurl4-openssl-dev \
+        libssl-dev pkg-config
+
+    # htslib (bgzip + tabix)
     cd /opt
     wget https://github.com/samtools/htslib/releases/download/1.19/htslib-1.19.tar.bz2
     tar -xjf htslib-1.19.tar.bz2
     cd htslib-1.19
     ./configure --prefix=/usr/local
-    make
+    make -j4
     make install
+    ldconfig
+
+%environment
+    export PATH=/usr/local/bin:$PATH
+    export http_proxy=http://proxy-upgrade.intra.glicid.fr:3128
+    export https_proxy=http://proxy-upgrade.intra.glicid.fr:3128
+
+%labels
+    Author F. Gautier
+    Version 1.1
+    Description modkit + bedtools + htslib (bgzip/tabix)

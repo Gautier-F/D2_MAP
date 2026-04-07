@@ -3,26 +3,27 @@ From: rocker/r-ver:4.5
 
 %post
     set -e
-    # a décommenter sur glicid
-    # export http_proxy=http://proxy-upgrade.intra.glicid.fr:3128
-    # export https_proxy=http://proxy-upgrade.intra.glicid.fr:3128
+    export http_proxy=http://proxy-upgrade.intra.glicid.fr:3128
+    export https_proxy=http://proxy-upgrade.intra.glicid.fr:3128
 
-    # Désactiver la vérification GPG
-    echo 'Acquire::AllowInsecureRepositories "true";' > /etc/apt/apt.conf.d/99insecure
-    echo 'Acquire::AllowDowngradeToInsecureRepositories "true";' >> /etc/apt/apt.conf.d/99insecure
-    echo 'APT::Get::AllowUnauthenticated "true";' >> /etc/apt/apt.conf.d/99insecure
+    # Fix sandbox APT
+    mkdir -p /etc/apt/apt.conf.d/
+    echo 'APT::Sandbox::User "root";' > /etc/apt/apt.conf.d/99sandbox
+    echo 'Acquire::http::Proxy "http://proxy-upgrade.intra.glicid.fr:3128";' >> /etc/apt/apt.conf.d/99sandbox
+    echo 'Acquire::https::Proxy "http://proxy-upgrade.intra.glicid.fr:3128";' >> /etc/apt/apt.conf.d/99sandbox
+    echo 'Acquire::AllowInsecureRepositories "true";' >> /etc/apt/apt.conf.d/99sandbox
+    echo 'APT::Get::AllowUnauthenticated "true";' >> /etc/apt/apt.conf.d/99sandbox
 
-    apt-get update --allow-insecure-repositories
+    apt-get update -y
 
-    # Installer gnupg et les clés Ubuntu
-    apt-get install -y --allow-unauthenticated gnupg2 ubuntu-keyring
+    apt-get install -y --no-install-recommends --allow-unauthenticated \
+        gnupg2 ubuntu-keyring
 
-    # Relancer apt-get update proprement
-    apt-get update
+    apt-get update -y
 
     apt-get install -y --no-install-recommends \
-        build-essential \
-        gfortran \
+        make gcc g++ gfortran \
+        libc6-dev \
         zlib1g-dev \
         libbz2-dev \
         liblzma-dev \
@@ -32,26 +33,28 @@ From: rocker/r-ver:4.5
         libgit2-dev \
         pandoc
 
-    R --slave -e "options(pkgType='source')"
+    # Packages R
     R --slave -e "install.packages('BiocManager', repos='http://cran.r-project.org')"
     R --slave -e "BiocManager::install(ask=FALSE, update=FALSE)"
-    R --slave -e "BiocManager::install(c('ggplot2', 
-                                        'data.table', 
-                                        'openxlsx', 
-                                        'ggrepel', 
-                                        'CMplot', 
-                                        'rmarkdown', 
-                                        'openxlsx', 
-                                        'DT',
-                                        'org.Hs.eg.db',
-                                        'rtracklayer',
-                                        'dplyr',
-                                        'cowplot',
-                                        'stringr'),
-                                        ask=FALSE, update=FALSE, type='source')"
+    R --slave -e "BiocManager::install(
+        c('ggplot2',
+          'data.table',
+          'openxlsx',
+          'ggrepel',
+          'CMplot',
+          'rmarkdown',
+          'DT',
+          'org.Hs.eg.db',
+          'rtracklayer',
+          'dplyr',
+          'cowplot',
+          'stringr'),
+        ask=FALSE, update=FALSE, type='source')"
 
 %environment
     export LC_ALL=C
+    export http_proxy=http://proxy-upgrade.intra.glicid.fr:3128
+    export https_proxy=http://proxy-upgrade.intra.glicid.fr:3128
     export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
 %runscript
@@ -59,5 +62,5 @@ From: rocker/r-ver:4.5
 
 %labels
     Author F. Gautier
-    Version 1.0
-    Description R-base with ggplot2, data.table, and openxlsx
+    Version 1.1
+    Description R 4.5 + Bioconductor stack
