@@ -18,7 +18,7 @@ sbatch --mail-user=<your_email@adress> /sh_scripts/slurm_pipeline_setup.sh <path
 
 Note: The genome folder must contain the genome index (e.g. genome.fa.fai)
 
-This installation step may take some time. (Optionally run this in a sbatch session)
+This installation step may take some time. 
 Note: 
         - the gff3 file used to annote regulatory features is from : https://ftp.ensembl.org/pub/release-114/regulation/homo_sapiens/GRCh38/annotation/Homo_sapiens.GRCh38.regulatory_features.v114.gff3.gz
         - the gtf file used to identify genes ids from regulatory element location is from: https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_49/gencode.v49.basic.annotation.gtf.gz

@@ -37,9 +37,9 @@ log.info """
     Patient_ID              : ${params.patient_id}
     Analyse                 : ${params.analysis}
     Modified base           : ${params.modified_bases}
-    Bam 1                   : ${params.path_to_bam_1}
+    Bam 1                   : ${params.path_to_bam_1_folder}
     Label cond. 1           : ${params.cond_1}
-    Bam 2                   : ${params.path_to_bam_2}
+    Bam 2                   : ${params.path_to_bam_2_folder}
     Label cond. 2           : ${params.cond_2}
     Reference gen.          : ${params.path_to_ref}
     Reg. Feat. annot.       : ${params.path_to_regulatory_features_gtf}
@@ -73,10 +73,10 @@ workflow {
 
     // canal tuple [meta/path_to_bam]
     ch_bam_1 = Channel
-                    .fromPath("${params.path_to_bam_1}")
+                    .fromPath("${params.path_to_bam_1_folder}")
                     .map { it -> [ [id: params.patient_id, cond: params.cond_1], it ]}
     ch_bam_2 = Channel
-                    .fromPath("${params.path_to_bam_2}")
+                    .fromPath("${params.path_to_bam_2_folder}")
                     .map { it -> [ [id: params.patient_id, cond: params.cond_2], it ]}
     //channel
     merge_ch = ch_bam_1.concat(ch_bam_2)
