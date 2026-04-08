@@ -5,8 +5,10 @@ methylation différentielle par région (windowing de 1Kb / step 0.5Kb)
 */
 
 process modkitDmrPair {
+
     cpus 20
     memory '40 GB'
+
 
 
     publishDir 'results/Bed_files', mode: 'symlink', pattern: '*.bed'

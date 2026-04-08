@@ -39,9 +39,7 @@ Run the command:
         Rscript R_scripts/input_fetching.R  
 
 Launch the pipeline with the commands: 
-        source $HOME/.bashrc
-        micromamba activate /micromamba/$USER/envs/nextflow_env 
-        nextflow run main.nf -params-file inputs_fetching/inputs_d2map.json
+        sbatch --mail-user=<your_email> sh_scripts/slurm_launch_D2MAP.sh
 
 
 The analysis report will be available in the results/D2MAP_Report folder.
