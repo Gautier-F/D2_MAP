@@ -9,7 +9,7 @@ process bamMergingFiltering {
         tag "${meta.cond}" 
         publishDir 'results/Bam_files', mode: 'symlink', pattern: '*.bam'
         publishDir  'results/qc_stats', mode: 'copy', pattern: '*.{txt, tsv}'
-        container "${projectDir}/containers/dorado_latest.sif" 
+        container "${projectDir}/containers/dorado.sif" 
 
         input:
             tuple val(meta), path(input_path_bam_directory)
