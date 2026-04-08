@@ -3,7 +3,7 @@
 
 process doradoSamtoolsVersion {
 
-    container "${projectDir}/containers/dorado_latest.sif"
+    container "${projectDir}/containers/dorado.sif"
 
     output:
         path "dorado_samtools_version.txt", emit: dorado_samtools_version
