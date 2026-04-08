@@ -2,8 +2,8 @@
 #SBATCH --job-name=D2_MAP_run           
 #SBATCH --output=D2_MAP_run%j.out        
 #SBATCH --error=D2_MAP_run_%j.err         
-#SBATCH --qos=short         
-#SBATCH --time=01:00:00
+#SBATCH --qos=medium        
+#SBATCH --time=2-00:00:00
 #SBATCH --partition=standard              
 #SBATCH --nodes=1                        
 #SBATCH --ntasks=1                        

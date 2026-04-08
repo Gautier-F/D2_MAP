@@ -9,8 +9,6 @@ process modkitDmrPair {
     cpus 20
     memory '40 GB'
 
-
-
     publishDir 'results/Bed_files', mode: 'symlink', pattern: '*.bed'
     publishDir 'results/Tag_stats', mode: 'copy', pattern: '*.txt'
 
