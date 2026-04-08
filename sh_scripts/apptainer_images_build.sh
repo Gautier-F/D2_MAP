@@ -57,3 +57,6 @@ rm -rf $TMPDIR
 eval "$(micromamba shell hook --shell bash)"
 micromamba activate /micromamba/$USER/envs/nextflow_env
 bedtools makewindows -g $path_to_genome_folder/genome.fa.fai -w $WINDOW -s $STEP > $path_to_d2_map_root/data/windows_sliding.bed
+
+# Fetch gene_annotation.gtf
+wget -P data/  https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_49/gencode.v49.basic.annotation.gtf.gz
