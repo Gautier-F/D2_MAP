@@ -6,7 +6,9 @@
 ╚═════╝ ╚══════╝    ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝
 
 ################################################
-TO BE DONE ONLY ON FIRST USE
+SET-UP:
+------
+[ TO BE DONE ONLY ON FIRST USE ]
 Note: micromamba installation is required for correct functionality (https://doc.glicid.fr/GLiCID-PUBLIC/detailled/software/environment/micromamba.html)
 
 Navigate to the D2_MAP root directory, then copy and paste these command lines into the terminal:
@@ -25,7 +27,7 @@ Note:
 
 
 Informations required to run D2_MAP:
-
+------------------------------------
 Fill in the Google Sheet: https://docs.google.com/spreadsheets/d/1G-Z_hKSeBRrZWTgs5YmEhgGB0VDx2Vu4CEjCjJa3i04/edit?usp=sharing
 Note: each path must be an absolute path
 
