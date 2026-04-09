@@ -1,5 +1,5 @@
 process mdReport {
-    publishDir 'results/D2MAP_Report', mode: 'copy'
+    publishDir "results_${params.patient_id}/D2MAP_Report", mode: 'copy'
     container "${projectDir}/containers/R_extended.sif"
 
     input:

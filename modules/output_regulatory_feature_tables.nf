@@ -4,7 +4,7 @@
 
 process regulatoryFeaturesTables {
 
-    publishDir 'results', mode: 'copy'
+    publishDir "results_${params.patient_id}", mode: 'copy'
     container "${projectDir}/containers/R_extended.sif"
 
     input:

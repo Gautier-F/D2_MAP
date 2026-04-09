@@ -6,8 +6,8 @@ tri et indexation du .bam aligné
 
 process bamSortIndex {
     tag "${meta.cond}"
-    publishDir 'results/Bam_files', mode: 'symlink', pattern: '*.{bam,bai}'
-    publishDir 'results/qc_stats', mode: 'copy', pattern: '*.{txt,tsv}'
+    publishDir "results_${params.patient_id}/Bam_files", mode: 'symlink', pattern: '*.{bam,bai}'
+    publishDir "results_${params.patient_id}/qc_stats", mode: 'copy', pattern: '*.{txt,tsv}'
     container "${projectDir}/containers/dorado.sif"
 
     input:

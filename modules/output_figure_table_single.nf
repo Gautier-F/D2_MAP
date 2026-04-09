@@ -7,8 +7,8 @@ comme étant différentiellement méthylées)
 
 process outputFigureTableSingle {
 
-    publishDir 'results/VolcanoPlots', mode: 'copy', pattern: "*.png"
-    publishDir 'results/DMR_tables', mode: 'copy', pattern: "*.xlsx"
+    publishDir "results_${params.patient_id}/VolcanoPlots", mode: 'copy', pattern: "*.png"
+    publishDir "results_${params.patient_id}/DMR_tables", mode: 'copy', pattern: "*.xlsx"
     container "${projectDir}/containers/R_extended.sif"
 
     input:

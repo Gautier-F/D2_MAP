@@ -4,7 +4,7 @@
 
 process MultiQC {
 
-    publishDir 'results/BamQC', mode: 'copy'
+    publishDir "results_${params.patient_id}/BamQC", mode: 'copy'
     container "${projectDir}/containers/multiqc_latest.sif"
 
     input:

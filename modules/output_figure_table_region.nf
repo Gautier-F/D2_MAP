@@ -3,9 +3,9 @@
 /* création du volcanoplot à partir de la table dmr_enriched (étape 6)  */
 
 process outputFigureTableRegion {
-    publishDir "results/VolcanoPlots", mode: 'copy', pattern: "*.png"
-    publishDir "results/DMR_tables",   mode: 'copy', pattern: "*.xlsx"
-    publishDir "results/CMplots",     mode: 'copy', pattern: "CMplot*.png"
+    publishDir "results_${params.patient_id}/VolcanoPlots", mode: 'copy', pattern: "*.png"
+    publishDir "results_${params.patient_id}/DMR_tables",   mode: 'copy', pattern: "*.xlsx"
+
     container "${projectDir}/containers/R_extended.sif"
     // stageInMode 'copy'
 

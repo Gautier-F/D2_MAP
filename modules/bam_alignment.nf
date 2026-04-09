@@ -6,7 +6,7 @@ alignement du .bam mergé lors de l'étape précédente avec dorado aligner
 
 process bamAlignment {
         tag "${meta.cond}"
-        publishDir 'results/Bam_files', mode: 'symlink'
+        publishDir "results_${params.patient_id}/Bam_files", mode: 'symlink'
         container "${projectDir}/containers/dorado.sif"
 
         input:

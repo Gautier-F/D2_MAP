@@ -6,7 +6,7 @@ pileup "traditionnal" des .bam alignés, triés et indexés (position CG, prise 
 
 process modkitPileup {
 
-    publishDir 'results/Bed_files', mode: "symlink"
+    publishDir "results_${params.patient_id}/Bed_files", mode: "symlink"
     container "${projectDir}/containers/modkit_v6_bedtools.sif"
 
     input:

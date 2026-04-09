@@ -156,7 +156,7 @@ workflow {
         )
         .collectFile(
             name: 'all_versions.txt',
-            storeDir: 'results/Versions',
+            storeDir: "results_${params.patient_id}/Versions",
             newLine: true
         )
 

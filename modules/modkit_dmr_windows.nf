@@ -9,8 +9,8 @@ process modkitDmrPair {
     cpus 20
     memory '40 GB'
 
-    publishDir 'results/Bed_files', mode: 'symlink', pattern: '*.bed'
-    publishDir 'results/Tag_stats', mode: 'copy', pattern: '*.txt'
+    publishDir "results_${params.patient_id}/Bed_files", mode: 'symlink', pattern: '*.bed'
+    publishDir "results_${params.patient_id}/Tag_stats", mode: 'copy', pattern: '*.txt'
 
     container "${projectDir}/containers/modkit_v6_bedtools.sif"
 

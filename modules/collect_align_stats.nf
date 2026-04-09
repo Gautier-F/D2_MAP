@@ -4,7 +4,7 @@
 
 process collectFlagstats{
 
-    publishDir "results/BamQC", mode: 'copy'
+    publishDir "results_${params.patient_id}/BamQC", mode: 'copy'
 
     input: 
         val flagstats
@@ -21,7 +21,7 @@ process collectFlagstats{
 }
 
 process collectStats {
-    publishDir "results/BamQC", mode: 'copy'
+    publishDir "results_${params.patient_id}/BamQC", mode: 'copy'
 
     input:
     path stats  // Utilise 'path' pour les fichiers

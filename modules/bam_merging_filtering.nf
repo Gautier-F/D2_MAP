@@ -7,8 +7,8 @@ process bamMergingFiltering {
         Merge des .bam à la sortie du run Prométhion
         */
         tag "${meta.cond}" 
-        publishDir 'results/Bam_files', mode: 'symlink', pattern: '*.bam'
-        publishDir  'results/qc_stats', mode: 'copy', pattern: '*.{txt, tsv}'
+        publishDir "results_${params.patient_id}/Bam_files", mode: 'symlink', pattern: '*.bam'
+        publishDir  "results_${params.patient_id}/qc_stats", mode: 'copy', pattern: '*.{txt, tsv}'
         container "${projectDir}/containers/dorado.sif" 
 
         input:
