@@ -1,0 +1,90 @@
+C'est une modification classique dans un pipeline Nextflow : vous voulez rendre l'entrée flexible pour accepter soit des fichiers bruts (FASTQ/BAM non filtrés), soit des fichiers BAM déjà prêts (alignés et triés).
+
+Voici comment adapter votre début de workflow :
+
+### 1. Adapter le canal d'entrée
+Il faut changer la logique pour que, si les fichiers sont déjà prêts, ils "sautent" directement dans le canal que `bamSortIndex` ou `modkitPileup` attendent.
+
+```nextflow
+workflow {
+    
+    // On définit un flag pour savoir si on saute l'alignement
+    def skip_alignment = params.skip_alignment ?: false
+
+    if ( !skip_alignment ) {
+        // --- LOGIQUE NORMALE ---
+        ch_bam_1 = Channel.fromPath("${params.path_to_bam_1}")
+                    .map { it -> [ [id: params.patient_id, cond: params.cond_1], it ]}
+        ch_bam_2 = Channel.fromPath("${params.path_to_bam_2}")
+                    .map { it -> [ [id: params.patient_id, cond: params.cond_2], it ]}
+        
+        merge_ch = ch_bam_1.concat(ch_bam_2)
+        
+        bamMergingFiltering(merge_ch)
+        bamAlignment(bamMergingFiltering.out.bam_merged, params.path_to_ref)
+        
+        // Le canal qui alimente la suite
+        ch_for_sort = bamAlignment.out.aligned_bam
+    } else {
+        // --- LOGIQUE "SAUT" ---
+        // Ici on suppose que path_to_bam_1 et 2 pointent déjà vers les BAM alignés
+        ch_bam_1 = Channel.fromPath("${params.path_to_bam_1}")
+                    .map { it -> [ [id: params.patient_id, cond: params.cond_1], it ]}
+        ch_bam_2 = Channel.fromPath("${params.path_to_bam_2}")
+                    .map { it -> [ [id: params.patient_id, cond: params.cond_2], it ]}
+        
+        ch_for_sort = ch_bam_1.concat(ch_bam_2)
+    }
+
+    // La suite du workflow utilise ch_for_sort
+    bamSortIndex(ch_for_sort)
+
+    modkitPileup(bamSortIndex.out.tuple_bam_bai, params.path_to_ref, params.modified_bases)
+    
+    // ... reste du workflow
+}
+```
+
+### 2. Ce qui a été modifié :
+1.  **Le paramètre `params.skip_alignment`** : Vous pourrez lancer votre pipeline avec `--skip_alignment true` quand vos BAM sont déjà prêts.
+2.  **La variable `ch_for_sort`** : C'est un canal "pivot". 
+    * Si on aligne, il récupère la sortie de `bamAlignment`.
+    * Si on saute, il récupère directement les fichiers d'entrée.
+3.  **L'entrée de `bamSortIndex`** : Elle ne pointe plus sur une étape spécifique, mais sur ce canal pivot.
+
+---
+
+### Une version encore plus propre (Automatique)
+Si vous voulez que Nextflow décide tout seul (si c'est un BAM, on ne réaligne pas, si c'est autre chose, on aligne), vous pouvez utiliser l'extension du fichier :
+
+```nextflow
+workflow {
+    // Canal qui contient vos entrées
+    ch_inputs = Channel.fromPath([params.path_to_bam_1, params.path_to_bam_2])
+                .map { file -> 
+                    def cond = file.name.contains(params.cond_1) ? params.cond_1 : params.cond_2
+                    return [ [id: params.patient_id, cond: cond], file ]
+                }
+
+    // On sépare en deux : ceux à aligner et ceux déjà alignés
+    ch_inputs.branch {
+        already_aligned: it[1].name.endsWith('.aligned.bam') // ou un critère de votre choix
+        to_process: true
+    }.set { ch_branched }
+
+    // On traite uniquement ceux qui en ont besoin
+    bamMergingFiltering(ch_branched.to_process)
+    bamAlignment(bamMergingFiltering.out.bam_merged, params.path_to_ref)
+
+    // On mélange les fichiers pré-alignés et ceux qui viennent de l'être
+    ch_final_bams = bamAlignment.out.aligned_bam.concat(ch_branched.already_aligned)
+
+    bamSortIndex(ch_final_bams)
+    // ...
+}
+```
+
+### Conseil pour votre cfDNA Nanopore :
+Puisque vos fichiers sont déjà alignés, assurez-vous qu'ils ont été alignés avec les mêmes paramètres que ceux prévus dans votre module `bamAlignment` (notamment la gestion des **modifications de bases** si vous utilisez `minimap2` avec les tags `Mm` et `Ml`), sinon `modkit` pourrait ne pas trouver les informations de méthylation.
+
+Est-ce que vos fichiers déjà alignés possèdent bien les tags de méthylation ?
