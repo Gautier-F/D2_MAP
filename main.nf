@@ -173,7 +173,7 @@ workflow {
             params.analysis,
             params.modified_bases,
             params.sid,
-            bamSortIndex.out.qc_stats.collectFile(name: 'bam_stats.txt', storeDir: 'results/qc_stats', newLine: true),
+            bamSortIndex.out.qc_stats.collectFile(name: 'bam_stats.txt', storeDir: "results_${params.patient_id}/qc_stats", newLine: true),
             bamSortIndex.out.flagstats.collect(),
             modkitDmrPair.out.tag_stats,
             outputFigureTableRegion.out.histo_score,
