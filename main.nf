@@ -78,12 +78,29 @@ workflow {
     ch_bam_2 = Channel
                     .fromPath("${params.path_to_bam_2_folder}")
                     .map { it -> [ [id: params.patient_id, cond: params.cond_2], it ]}
-    //channel
-    merge_ch = ch_bam_1.concat(ch_bam_2)
-    
-    bamMergingFiltering(merge_ch)
+    //----------------------------------------------------------------------------
+    // MERGE CONDITIONNEL
+    //----------------------------------------------------------------------------
+    def ch_to_align
+    if ( params.to_be_merged == "True" ) {
+        merge_ch = ch_bam_1.concat(ch_bam_2)
+        bamMergingFiltering(merge_ch)
+        ch_to_align = bamMergingFiltering.out.bam_merged
+    } else {
+        ch_to_align = ch_bam_1.concat(ch_bam_2)
+    } 
 
-    bamAlignment(bamMergingFiltering.out.bam_merged, params.path_to_ref)
+    //----------------------------------------------------------------------------
+    // ALIGNEMENT CONDITIONNEL
+    //----------------------------------------------------------------------------
+    def ch_to_sort 
+    if ( params.to_be_aligned == "True" ) {
+        bamAlignment(ch_to_align, params.path_to_ref)
+        ch_to_sort = bamAlignment.out.aligned_bam
+    } else {
+        ch_to_sort = ch_to_align
+    }
+
 
     bamSortIndex(bamAlignment.out.aligned_bam)
 

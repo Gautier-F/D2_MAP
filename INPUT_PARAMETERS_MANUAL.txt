@@ -1,0 +1,109 @@
+===============================================================================
+                       D2_MAP PIPELINE PARAMETERS MANUAL
+===============================================================================
+
+This README file describes the input parameters required to run the D2_MAP 
+pipeline. These parameters must be configured via an input JSON file.
+
+-------------------------------------------------------------------------------
+1. EXECUTION CONTROL FLAGS
+-------------------------------------------------------------------------------
+These boolean parameters allow you to dynamically skip or include early 
+preprocessing steps.
+
+* to_be_merged     [boolean: true or false]
+  Determines whether input BAM files need to be merged and filtered. If false, 
+  this preprocessing step is skipped.
+
+* to_be_aligned    [boolean: true or false]
+  Determines whether the reads need to be aligned against the reference genome. 
+  If false, the pipeline assumes the input BAMs are already aligned and skips 
+  the alignment step.
+
+-------------------------------------------------------------------------------
+2. CORE METADATA & ANALYSIS SETTINGS
+-------------------------------------------------------------------------------
+* patient_id       [string]
+  The unique identifier for the patient or sample being analyzed. This ID 
+  is used for naming output directories and generating reports.
+
+* analysis         [string]
+  The name or description of the specific analysis run.
+
+* modified_bases   [string]
+  The specific type of modified base(s) to look for during the modkit pileup 
+  and DMR detection steps (5mC and/or 5hmC, or 6mA). 
+  (Note: to detect both 5mC and 5hmC, separate the values with a space (e.g. "5mC 5hmC"))
+
+-------------------------------------------------------------------------------
+3. INPUT PATHS & EXPERIMENTAL DESIGN
+-------------------------------------------------------------------------------
+The pipeline compares two distinct experimental conditions (Condition 1 vs. 2).
+
+--- Condition 1 ---
+* path_to_bam_1_folder [string/path]
+  Path to the directory containing the input BAM file(s) for the first 
+  condition.
+
+* cond_1               [string]
+  The experimental label given to the first condition (e.g., Control, 
+  Untreated).
+
+--- Condition 2 ---
+* path_to_bam_2_folder [string/path]
+  Path to the directory containing the input BAM file(s) for the second 
+  condition.
+
+* cond_2               [string]
+  The experimental label given to the second condition (e.g., Tumor, 
+  Treated).
+
+-------------------------------------------------------------------------------
+4. REFERENCE GENOMES & GENOMIC ANNOTATIONS
+-------------------------------------------------------------------------------
+* path_to_ref                    [string/path]
+  Path to the reference genome FASTA file used for alignment and modkit 
+  operations.
+
+* path_to_regulatory_features_gtf [string/path]
+  Path to the GTF/GFF file containing regulatory features (e.g., enhancers, 
+  promoters) used for annotation enrichment.
+
+* path_to_gene_annotation_gtf     [string/path]
+  Path to the gene annotation GTF file used to map detected DMRs to the 
+  nearest genes.
+
+* path_to_region                  [string/path]
+  Path to a BED file specifying target genomic windows or regions of interest 
+  for the DMR paired analysis.
+
+-------------------------------------------------------------------------------
+5. STATISTICAL THRESHOLDS
+-------------------------------------------------------------------------------
+* dmr_score_thr    [float, default: 0.001]
+  The statistical score threshold used to filter and identify significant 
+  Differentially Methylated Regions (DMRs).
+
+===============================================================================
+EXAMPLE JSON CONFIGURATION FILE (template.json)
+===============================================================================
+{
+  "patient_id": "PATIENT_001",
+  "analysis": "Methylation_Study_2026",
+  "modified_bases": "5mC",
+  "to_be_merged": true, 
+  "to_be_aligned": true,
+  "path_to_bam_1_folder": "/path/to/data/condition_1/",
+  "cond_1": "Control",
+  "path_to_bam_2_folder": "/path/to/data/condition_2/",
+  "cond_2": "Treated",
+  "path_to_ref": "/path/to/references/hg38.fa",
+  "path_to_regulatory_features_gtf": "/path/to/annotations/regulatory_features.gtf",
+  "path_to_gene_annotation_gtf": "/path/to/annotations/genes.gtf",
+  "path_to_region": "/path/to/annotations/cpg_islands.bed",
+  "dmr_score_thr": 0.001
+}
+
+NOTE: Ensure that boolean values (true/false) and numerical thresholds do not 
+      have quotation marks in your final JSON file.
+===============================================================================

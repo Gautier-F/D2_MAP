@@ -2,6 +2,8 @@
   "patient_id": "",
   "analysis": "",
   "modified_bases": "",
+  "to_be_merged": "", 
+  "to_be_aligned": "",
   "path_to_bam_1_folder": "",
   "cond_1": "",
   "path_to_bam_2_folder": "",

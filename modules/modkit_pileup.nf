@@ -1,5 +1,4 @@
 #!/usr/bin/env nextflow
-
 /*
 pileup "traditionnal" des .bam alignés, triés et indexés (position CG, prise en compte de C et 5mC uniquement)
 */
@@ -19,12 +18,13 @@ process modkitPileup {
     
     script:
     def prefix = "${meta.cond}"
+    def cpg_flag = (modified_bases == "6mA") ? "" : "--cpg"
     """
     modkit pileup \
         ${input_bam} \
         ${prefix}_pileup.bed.gz \
         --ref ${path_to_ref_genome} \
-        --cpg \
+        ${cpg_flag} \
         --modified-bases ${modified_bases} \
         --combine-mods \
         --threads 16 \
