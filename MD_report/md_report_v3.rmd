@@ -247,6 +247,7 @@ cat('<img src="', params$histo_score_single, '" width="40%"/>\n\n', sep = "")
 ## **Targeted Genes** {.tabset #chapitre3}
 
 ### **Regions** {.tabset}
+<i><u> Note: </u>Promoter tables describe only hypomethylated sites or regions in condition **`r params$cond2`**</i>
 ```{r targeted_genes_region, echo = F, results = "asis", message = F, warning= F}
 # récupération des tables contenues dans le dossier Targeted_genes/Region/
 library(openxlsx)

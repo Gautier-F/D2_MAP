@@ -78,11 +78,12 @@ workflow {
     ch_bam_2 = Channel
                     .fromPath("${params.path_to_bam_2_folder}")
                     .map { it -> [ [id: params.patient_id, cond: params.cond_2], it ]}
+
     //----------------------------------------------------------------------------
     // MERGE CONDITIONNEL
     //----------------------------------------------------------------------------
     def ch_to_align
-    if ( params.to_be_merged == "True" ) {
+    if ( params.to_be_merged == "frue" ) {
         merge_ch = ch_bam_1.concat(ch_bam_2)
         bamMergingFiltering(merge_ch)
         ch_to_align = bamMergingFiltering.out.bam_merged
@@ -94,7 +95,7 @@ workflow {
     // ALIGNEMENT CONDITIONNEL
     //----------------------------------------------------------------------------
     def ch_to_sort 
-    if ( params.to_be_aligned == "True" ) {
+    if ( params.to_be_aligned == "true" ) {
         bamAlignment(ch_to_align, params.path_to_ref)
         ch_to_sort = bamAlignment.out.aligned_bam
     } else {
